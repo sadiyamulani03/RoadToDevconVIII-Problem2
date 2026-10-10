@@ -1,0 +1,21 @@
+# Foundry
+cache/
+out/
+broadcast/
+
+# Env — never commit real secrets
+.env
+.env.local
+.env.*.local
+
+# Node / Frontend
+node_modules/
+.next/
+out-frontend/
+*.log
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
