@@ -118,8 +118,9 @@ The script refuses to run without `PRIVATE_KEY` in the environment — nothing i
 hard-coded. After deployment, put the address and deployment block into
 `frontend/.env.local` (see below).
 
-**Deployment status: not yet deployed.** No funded testnet key or RPC credential was
-available in this environment, so no contract address is claimed here.
+**Contract deployment status: not deployed.** Deploying requires a funded, testnet-only
+`PRIVATE_KEY` (plus optional `BASESCAN_API_KEY` for verification); none was available in the
+environment where this README was last updated, so no contract address is claimed here.
 
 | Item | Value |
 | --- | --- |
@@ -156,6 +157,21 @@ NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
 The root `.env` (deployment only, never committed) holds `PRIVATE_KEY`,
 `BASE_SEPOLIA_RPC_URL`, `BASESCAN_API_KEY`. Both `.env` and `.env.local` are gitignored;
 `.env.example` files contain placeholders only.
+
+### Live hosting (Vercel)
+
+The frontend is deployed on Vercel: **https://pixel-turf-swart.vercel.app**
+
+Until `NEXT_PUBLIC_CONTRACT_ADDRESS` and `NEXT_PUBLIC_DEPLOYMENT_BLOCK` are set in the
+Vercel project, the page intentionally shows a "contract address is not configured" banner
+instead of pretending to show chain data. After deploying the contract, connect it with:
+
+```bash
+cd frontend
+vercel env add NEXT_PUBLIC_CONTRACT_ADDRESS production   # the deployed address
+vercel env add NEXT_PUBLIC_DEPLOYMENT_BLOCK production   # the deployment block number
+vercel --prod                                            # rebuild + redeploy
+```
 
 Without `NEXT_PUBLIC_CONTRACT_ADDRESS` the UI still renders and explains that the contract
 is not configured yet — it never pretends to show chain data it cannot fetch.
