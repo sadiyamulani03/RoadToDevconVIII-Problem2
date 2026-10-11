@@ -115,18 +115,28 @@ forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify
 ```
 
 The script refuses to run without `PRIVATE_KEY` in the environment — nothing is ever
-hard-coded. After deployment, put the address and deployment block into
-`frontend/.env.local` (see below).
+hard-coded. Note that `vm.envUint("PRIVATE_KEY")` expects the key **with** its `0x` prefix.
 
-**Contract deployment status: not deployed.** Deploying requires a funded, testnet-only
-`PRIVATE_KEY` (plus optional `BASESCAN_API_KEY` for verification); none was available in the
-environment where this README was last updated, so no contract address is claimed here.
+### Deployment (verified)
+
+PixelTurf is deployed on **Base Sepolia (chain ID 84532)** and verified on Basescan
+("Pass - Verified", also submitted to Sourcify):
 
 | Item | Value |
 | --- | --- |
-| Contract address | _(not deployed yet — placeholder)_ |
-| Deployment tx | _(pending)_ |
-| Explorer link | _(pending)_ |
+| Contract address | [`0x405269bf09e5722aCc09E1A0CC8573C07cFd87b7`](https://sepolia.basescan.org/address/0x405269bf09e5722aCc09E1A0CC8573C07cFd87b7) |
+| Deployment tx | [`0x2f2ac905ab5fd836097ca1eec2b8a2f4f3fe3fa6a4004109911c68868ce90198`](https://sepolia.basescan.org/tx/0x2f2ac905ab5fd836097ca1eec2b8a2f4f3fe3fa6a4004109911c68868ce90198) |
+| Deployment block | `47963049` |
+| Chain ID | 84532 (Base Sepolia) |
+| Receipt status | `1` (success), contract code 1468 bytes |
+| Initial state | `WIDTH=100`, `HEIGHT=100`, `COOLDOWN=60`, all tiles `0` |
+| Explorer verification | Basescan: **Pass - Verified** · [Sourcify job](https://sourcify.dev/server/verify-ui/jobs/ba471398-5631-4903-86b2-22cee68768ee) |
+
+Live on-chain checks performed against this deployment: a valid placement succeeded
+(tx [`0x4f99bdeb…fab9`](https://sepolia.basescan.org/tx/0x4f99bdebb61dd2ad4408c1786f43a75fad7789aae6131b0fc9e972189cd4fab9),
+tile and `PixelPlaced` event verified); an in-cooldown placement reverted with the custom
+`CooldownActive(nextAllowedAt)` error and left state untouched; out-of-bounds calls reverted
+with `InvalidX(100)` / `InvalidY(99999)`.
 
 ## Frontend
 
@@ -160,11 +170,12 @@ The root `.env` (deployment only, never committed) holds `PRIVATE_KEY`,
 
 ### Live hosting (Vercel)
 
-The frontend is deployed on Vercel: **https://pixel-turf-swart.vercel.app**
+The frontend is deployed on Vercel and connected to the deployed contract:
+**https://pixel-turf-swart.vercel.app**
 
-Until `NEXT_PUBLIC_CONTRACT_ADDRESS` and `NEXT_PUBLIC_DEPLOYMENT_BLOCK` are set in the
-Vercel project, the page intentionally shows a "contract address is not configured" banner
-instead of pretending to show chain data. After deploying the contract, connect it with:
+The Vercel project’s production environment holds the public values
+(`NEXT_PUBLIC_CONTRACT_ADDRESS=0x405269bf09e5722aCc09E1A0CC8573C07cFd87b7`,
+`NEXT_PUBLIC_DEPLOYMENT_BLOCK=47963049`) and was rebuilt after they were set. To change them:
 
 ```bash
 cd frontend
@@ -173,8 +184,8 @@ vercel env add NEXT_PUBLIC_DEPLOYMENT_BLOCK production   # the deployment block 
 vercel --prod                                            # rebuild + redeploy
 ```
 
-Without `NEXT_PUBLIC_CONTRACT_ADDRESS` the UI still renders and explains that the contract
-is not configured yet — it never pretends to show chain data it cannot fetch.
+If `NEXT_PUBLIC_CONTRACT_ADDRESS` is ever unset, the UI still renders and explains that the
+contract is not configured — it never pretends to show chain data it cannot fetch.
 
 ### How the canvas loads and stays live
 
